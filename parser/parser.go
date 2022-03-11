@@ -1,5 +1,5 @@
 // Package parser implements a recursive descent parser for the Monkey language.
-// It makes use of "Pratt parsing"
+// It makes use of "Pratt Parsing", aka Top Down Operator Precedence.
 package parser
 
 import (

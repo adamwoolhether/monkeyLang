@@ -61,7 +61,7 @@ func (ls *LetStatement) TokenLiteral() string {
 }
 
 // Identifier represents the identifiers of a binding.
-// It satisfies the Expression interface.
+// Its methods satisfy the Expression interface.
 type Identifier struct {
 	Token token.Token // the token.IDENT token
 	Value string
@@ -82,4 +82,16 @@ type ReturnStatement struct {
 func (rs *ReturnStatement) statementNode() {}
 func (rs *ReturnStatement) TokenLiteral() string {
 	return rs.Token.Literal
+}
+
+// ExpressionStatement represents an expression in Monkeu.
+// Its methdos satisfy the Statement and Node interface.
+type ExpressionStatement struct {
+	Token      token.Token // the first token of the expression
+	Expression Expression
+}
+
+func (es *ExpressionStatement) statementNode() {}
+func (es *ExpressionStatement) TokenLiteral() string {
+	return es.Token.Literal
 }
