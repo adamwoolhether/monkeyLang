@@ -10,14 +10,39 @@ import (
 	"github.com/adamwoolhether/monkeyLang/token"
 )
 
+type (
+	// prefixParseFn gets called when a token
+	// type in prefix position is encountered.
+	prefixParseFn func() ast.Expression
+	// infixParseFn gets caleld when a token
+	// type in infix position is encountered.
+	infixParseFn func(ast.Expression) ast.Expression
+)
+
 // Parser represents the information necessary to parse a Monkey program.
 // curToken allows parsing of the token at the current position, peekToken
-// allows the parser to make a decision based on the next token.
+// allows the parser to make a decision based on the next token. Token
+// types can have up to two parsing funcs asociated with them, depending
+// on whether the token is found in a prefix or infix position.
 type Parser struct {
-	l         *lexer.Lexer
-	errors    []string
+	l      *lexer.Lexer
+	errors []string
+	
 	curToken  token.Token
 	peekToken token.Token
+	
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
+}
+
+// registerPrefix adds entries to the Parser's respective function map.
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+// registerInfixi adds entries to the Parser's respective function map.
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
 
 // New returns a pointer to a new parser.
