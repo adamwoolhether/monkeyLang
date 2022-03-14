@@ -126,7 +126,7 @@ func (rs *ReturnStatement) String() string {
 }
 
 // ExpressionStatement represents an expression in Monkeu.
-// Its methdos satisfy the Statement and Node interface.
+// Its methods satisfy the Statement and Node interface.
 type ExpressionStatement struct {
 	Token      token.Token // the first token of the expression
 	Expression Expression
@@ -142,3 +142,17 @@ func (es *ExpressionStatement) String() string {
 	
 	return ""
 }
+
+// IntegerLiteral represents integers in Monkey. Similar
+// to Identifier, but the Value is of int64 type. Building
+// and IntegerLiteral will require converting a string
+// vaule in IntegerLiteral.Token.Literal to an int64.
+// Its methods satisfy the Statement and Node interface.
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode()      {}
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) String() string       { return il.Token.Literal }

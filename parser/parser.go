@@ -4,6 +4,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 	
 	"github.com/adamwoolhether/monkeyLang/ast"
 	"github.com/adamwoolhether/monkeyLang/lexer"
@@ -68,6 +69,7 @@ func New(l *lexer.Lexer) *Parser {
 	
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	
 	// Read two tokens, setting curToken and peekToken
 	p.nextToken()
@@ -224,4 +226,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	leftExp := prefix()
 	
 	return leftExp
+}
+
+// parseIntegerLiteral returns a *ast.IntegerLiteral
+// node after it converts p.curToken.Literal to an int64
+// saved to the Value field.
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+	
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("couldn't parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	
+	lit.Value = value
+	
+	return lit
 }
