@@ -10,6 +10,18 @@ import (
 	"github.com/adamwoolhether/monkeyLang/token"
 )
 
+// Define the precedences of the Monkey programming language.
+const (
+	_ int = iota
+	LOWEST
+	EQUALS      // ==
+	LESSGREATER // > or <
+	SUM         // +
+	PRODUCT     // *
+	PREFIX      // -X or !X
+	CALL        // myFunction(X)
+)
+
 type (
 	// prefixParseFn gets called when a token
 	// type in prefix position is encountered.
@@ -45,18 +57,30 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
-// New returns a pointer to a new parser.
+// New returns a pointer to a new parser with the prefixParseFns map
+// initialized and registered with the correct parsing function to the
+// respective token type.
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
 		errors: []string{},
 	}
 	
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	
 	// Read two tokens, setting curToken and peekToken
 	p.nextToken()
 	p.nextToken()
 	
 	return p
+}
+
+// parseIdentifier returns an *ast.Identifier with the current token
+// in the Token field and literal value of the token in Value. It
+// does not advance tokens.
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 // Errors returns a slice of error strings that the parser may encounter.
@@ -104,7 +128,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -170,4 +194,34 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 	
 	return stmt
+}
+
+// parseExpressionStatement constructs an *ast.Statement node with
+// the current token, skipping over until it encounters a
+// semicolon. The semicolon is optional, allowing expression
+// statements to accept things like '5 + 5' into the REPL. The
+// lowest possible precedence is passed to parseExpression(), as
+// nothing has been parsed yet, meaning we can't compare precedences.
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.curToken}
+	stmt.Expression = p.parseExpression(LOWEST)
+	
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	
+	return stmt
+}
+
+// parseExpression checks if the parsing func associated with
+// p.curToken.Type is available in the prefix position, and
+// calling it if so, returning nil if not.
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.curToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+	
+	return leftExp
 }
