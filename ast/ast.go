@@ -156,3 +156,27 @@ type IntegerLiteral struct {
 func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 func (il *IntegerLiteral) String() string       { return il.Token.Literal }
+
+// PrefixExpression represents a prefix expression. Operators in Monkey
+// are either a '-' or '!', and Right is the expression immediately
+// to the right of the operator. It's string method ensures to add
+// parantheses to the right and left of the operator and operand,
+// distinguishing those operands that belong to an operator.
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string // either '-' or '!'
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode()      {}
+func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+	
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+	
+	return out.String()
+}
