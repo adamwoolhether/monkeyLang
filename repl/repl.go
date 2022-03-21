@@ -1,3 +1,4 @@
+// Package repl implements Read Evaluate Print Loop logic for Monkey.
 package repl
 
 import (
@@ -5,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	
+	"github.com/adamwoolhether/monkeyLang/evaluator"
 	"github.com/adamwoolhether/monkeyLang/lexer"
 	"github.com/adamwoolhether/monkeyLang/parser"
 )
@@ -45,8 +47,11 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 		
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
