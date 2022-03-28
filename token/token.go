@@ -49,6 +49,9 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
+	
+	// Data Types
+	STRING = "STRING"
 )
 
 // keywords holds our language keywords, to separate them
