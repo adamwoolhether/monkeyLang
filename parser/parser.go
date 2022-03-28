@@ -524,6 +524,8 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 	array := &ast.ArrayLiteral{Token: p.curToken}
 	
 	array.Elements = p.parseExpressionsList(token.RBRACKET)
+	
+	return array
 }
 
 // parseExpressionsList is similar to parseCallArguments, but
