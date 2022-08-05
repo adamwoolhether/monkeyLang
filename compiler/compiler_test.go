@@ -14,7 +14,7 @@ import (
 type compilerTestCase struct {
 	input                string
 	expectedConstants    []interface{}
-	expectedInstructions []code.Insructions
+	expectedInstructions []code.Instructions
 }
 
 func TestIntegerArithmetic(t *testing.T) {
@@ -22,7 +22,7 @@ func TestIntegerArithmetic(t *testing.T) {
 		{
 			input:             "1 + 2",
 			expectedConstants: []interface{}{1, 2},
-			expectedInstructions: []code.Insructions{
+			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
 			},
@@ -69,7 +69,7 @@ func parse(input string) *ast.Program {
 	return p.ParseProgram()
 }
 
-func testInstructions(expected []code.Insructions, actual code.Insructions) error {
+func testInstructions(expected []code.Instructions, actual code.Instructions) error {
 	concatted := concatInstructions(expected)
 
 	if len(actual) != len(concatted) {
@@ -86,8 +86,8 @@ func testInstructions(expected []code.Insructions, actual code.Insructions) erro
 }
 
 // concatInstructions helps us turn a slice of slices into a flattened slice.
-func concatInstructions(s []code.Insructions) code.Insructions {
-	out := code.Insructions{}
+func concatInstructions(s []code.Instructions) code.Instructions {
+	out := code.Instructions{}
 
 	for _, ins := range s {
 		out = append(out, ins...)

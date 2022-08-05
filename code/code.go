@@ -2,12 +2,51 @@
 package code
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 )
 
-// Insructions Instructions defines the set of bytecode instructions for the VM to run.
-type Insructions []byte
+// Instructions defines the set of bytecode instructions for the VM to run.
+type Instructions []byte
+
+// Instructions.String allows pretty printing of Instructions,
+// it is essentially a mini-disassembler.
+func (ins Instructions) String() string {
+	var out bytes.Buffer
+
+	i := 0
+	for i < len(ins) {
+		def, err := Lookup(ins[i])
+		if err != nil {
+			fmt.Fprintf(&out, "ERROR: %s\n", err)
+			continue
+		}
+
+		operands, read := ReadOperands(def, ins[i+1:])
+
+		fmt.Fprintf(&out, "%04d %s\n", i, ins.fmtInstructions(def, operands))
+
+		i += 1 + read
+	}
+
+	return out.String()
+}
+
+func (ins Instructions) fmtInstructions(def *Definition, operands []int) string {
+	operandCount := len(def.OperandWidths)
+
+	if len(operands) != operandCount {
+		return fmt.Sprintf("ERROR: operand len %d does not match defined %d\n", len(operands), operandCount)
+	}
+
+	switch operandCount {
+	case 1:
+		return fmt.Sprintf("%s %d", def.Name, operands[0])
+	}
+
+	return fmt.Sprintf("ERROR: unhandled operandCount for %s\n", def.Name)
+}
 
 // Opcode directs the VM to push something on to the stack.
 type Opcode byte
@@ -40,7 +79,7 @@ func Lookup(op byte) (*Definition, error) {
 	return def, nil
 }
 
-// Make enables building bytecode instructions.
+// Make enables building bytecode instructions by encoding operands.
 func Make(op Opcode, operands ...int) []byte {
 	def, ok := definitions[op]
 	if !ok {
@@ -68,4 +107,29 @@ func Make(op Opcode, operands ...int) []byte {
 	}
 
 	return instruction
+}
+
+// ReadOperands decodes a given set of encoded instructions and decodes them.
+// It exists as the counterpart to Make.
+func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
+	// Use *Definition of an opcode to determine how wide operands are.
+	operands := make([]int, len(def.OperandWidths))
+	offset := 0
+
+	// Range through Instructions to read in and convert as many bytes as defined in definition.
+	for i, width := range def.OperandWidths {
+		switch width {
+		case 2:
+			operands[i] = int(ReadUint16(ins[offset:]))
+		}
+
+		offset += width
+	}
+
+	return operands, offset
+}
+
+// ReadUint16 enables use by VM to skip looking up definition needed by ReadOperands.
+func ReadUint16(ins Instructions) uint16 {
+	return binary.BigEndian.Uint16(ins)
 }
