@@ -1,4 +1,8 @@
 // Package compiler evaluates given instructions and compiles Bytecode.
+// It should walk the AST recursively, find *ast.IntegerLiterals, evaluate
+// them and turn them into *object.Integers before adding them to the
+// constants field and adding OpConstant instructions to the internal
+// instructions slice.
 package compiler
 
 import (
@@ -20,7 +24,37 @@ func New() *Compiler {
 	}
 }
 
+// Compile determines how to handle given base on the node type.
 func (c *Compiler) Compile(node ast.Node) error {
+	switch node := node.(type) {
+	case *ast.Program:
+		for _, s := range node.Statements {
+			err := c.Compile(s)
+			if err != nil {
+				return err
+			}
+		}
+	case *ast.ExpressionStatement:
+		err := c.Compile(node.Expression)
+		if err != nil {
+			return err
+		}
+	case *ast.InfixExpression:
+		err := c.Compile(node.Left)
+		if err != nil {
+			return err
+		}
+
+		err = c.Compile(node.Right)
+		if err != nil {
+			return err
+		}
+
+	case *ast.IntegerLiteral:
+		integer := &object.Integer{Value: node.Value}
+		c.emit(code.OpConstant, c.addConstant(integer))
+	}
+
 	return nil
 }
 
@@ -30,6 +64,28 @@ func (c *Compiler) Bytecode() *Bytecode {
 		Instructions: c.instructions,
 		Constants:    c.constants,
 	}
+}
+
+// addConstant appends an object.Object to the end of a compiler's constants
+// slice, returning its index as an identifier
+func (c *Compiler) addConstant(obj object.Object) int {
+	c.constants = append(c.constants, obj)
+
+	return len(c.constants) - 1
+}
+
+// emit will generate an instruction and adding them to a collection in memeory.
+func (c *Compiler) emit(op code.Opcode, operands ...int) int {
+	ins := code.Make(op, operands...)
+	pos := c.addInstruction(ins)
+
+	return pos
+}
+func (c *Compiler) addInstruction(ins []byte) int {
+	posNewInstructions := len(c.instructions)
+	c.instructions = append(c.instructions, ins...)
+
+	return posNewInstructions
 }
 
 // Bytecode contains compiler-generated instructions and

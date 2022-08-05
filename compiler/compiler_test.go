@@ -73,7 +73,7 @@ func testInstructions(expected []code.Instructions, actual code.Instructions) er
 	concatted := concatInstructions(expected)
 
 	if len(actual) != len(concatted) {
-		return fmt.Errorf("wrong isntructions length.\nwant=%q\ngot =%q", concatted, actual)
+		return fmt.Errorf("wrong instructions length.\nwant=%q\ngot =%q", concatted, actual)
 	}
 
 	for i, ins := range concatted {

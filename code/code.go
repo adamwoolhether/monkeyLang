@@ -55,6 +55,7 @@ const (
 	// OpConstant acts as an index to hold bytecode instructions.
 	// Iota will automatically generate increasing byte values.
 	OpConstant Opcode = iota
+	OpAdd
 )
 
 // Definition enables looking up how many operands and opcode has
