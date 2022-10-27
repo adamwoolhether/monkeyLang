@@ -60,6 +60,10 @@ const (
 	// OpAdd tells the VM to pop the two leftmost elements off
 	// the stack, add them, and push the result back on stack.
 	OpAdd
+	// OpPop tells the VM to pop the topmost element off the stack.
+	// This helps prevent the stack from filling up by cleaning it
+	// after every expression statement.
+	OpPop
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -73,6 +77,7 @@ type Definition struct {
 var definitions = map[Opcode]*Definition{
 	OpConstant: {"OpConstant", []int{2}},
 	OpAdd:      {"OpAdd", []int{}}, // Empty slice signifies no operands.
+	OpPop:      {"OpPop", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.

@@ -31,15 +31,6 @@ func New(bytecode *compiler.Bytecode) *VM {
 	}
 }
 
-// StackTop returns the element at the top of the stack.
-func (vm *VM) StackTop() object.Object {
-	if vm.sp == 0 {
-		return nil
-	}
-
-	return vm.stack[vm.sp-1]
-}
-
 // Run turns VM into a virtual machine. It contains the heartbeat,
 // main loop, and fetch-decode-execute cycle.
 func (vm *VM) Run() error {
@@ -60,7 +51,6 @@ func (vm *VM) Run() error {
 			if err := vm.push(vm.constants[constIndex]); err != nil { // push the const onto the stack.
 				return err
 			}
-
 		case code.OpAdd:
 			// decode
 			right := vm.pop()
@@ -70,10 +60,28 @@ func (vm *VM) Run() error {
 
 			result := leftValue + rightValue
 			vm.push(&object.Integer{Value: result})
+		case code.OpPop:
+			vm.pop()
 		}
 	}
 
 	return nil
+}
+
+// StackTop returns the element at the top of the stack.
+func (vm *VM) StackTop() object.Object {
+	if vm.sp == 0 {
+		return nil
+	}
+
+	return vm.stack[vm.sp-1]
+}
+
+// LastPoppedStackElem allows a sanity check about
+// what element should have been on stack immediately
+// before being popped off.
+func (vm *VM) LastPoppedStackElem() object.Object {
+	return vm.stack[vm.sp]
 }
 
 // push checks the stack size and adds the object to the stack
