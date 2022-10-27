@@ -5,11 +5,11 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	
-	"github.com/adamwoolhether/monkeyLang/evaluator"
+
+	"github.com/adamwoolhether/monkeyLang/compiler"
 	"github.com/adamwoolhether/monkeyLang/lexer"
-	"github.com/adamwoolhether/monkeyLang/object"
 	"github.com/adamwoolhether/monkeyLang/parser"
+	"github.com/adamwoolhether/monkeyLang/vm"
 )
 
 const PROMPT = ">> "
@@ -29,31 +29,42 @@ const MONKEY_FACE = `            __,__
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
-	
+
 	for {
 		fmt.Fprintf(out, PROMPT)
-		
+
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
-		
+
 		line := scanner.Text()
 		l := lexer.New(line)
 		p := parser.New(l)
-		
+
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			continue
 		}
-		
-		evaluated := evaluator.Eval(program, env)
-		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
-			io.WriteString(out, "\n")
+
+		comp := compiler.New()
+		err := comp.Compile(program)
+		if err != nil {
+			fmt.Fprintf(out, "Whoops! Compilation failed:\n %s\n", err)
+			continue
 		}
+
+		machine := vm.New(comp.Bytecode())
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "Whoops! Executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		stackTop := machine.StackTop()
+		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, "\n")
 	}
 }
 
