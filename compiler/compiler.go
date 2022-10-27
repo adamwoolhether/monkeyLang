@@ -6,6 +6,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/adamwoolhether/monkeyLang/ast"
 	"github.com/adamwoolhether/monkeyLang/code"
 	"github.com/adamwoolhether/monkeyLang/object"
@@ -26,32 +28,39 @@ func New() *Compiler {
 
 // Compile determines how to handle given base on the node type.
 func (c *Compiler) Compile(node ast.Node) error {
-	switch node := node.(type) {
+	switch n := node.(type) {
 	case *ast.Program:
-		for _, s := range node.Statements {
+		for _, s := range n.Statements {
 			err := c.Compile(s)
 			if err != nil {
 				return err
 			}
 		}
 	case *ast.ExpressionStatement:
-		err := c.Compile(node.Expression)
+		err := c.Compile(n.Expression)
 		if err != nil {
 			return err
 		}
 	case *ast.InfixExpression:
-		err := c.Compile(node.Left)
+		err := c.Compile(n.Left)
 		if err != nil {
 			return err
 		}
 
-		err = c.Compile(node.Right)
+		err = c.Compile(n.Right)
 		if err != nil {
 			return err
+		}
+
+		switch n.Operator {
+		case "+":
+			c.emit(code.OpAdd)
+		default:
+			return fmt.Errorf("unknown operator %s", n.Operator)
 		}
 
 	case *ast.IntegerLiteral:
-		integer := &object.Integer{Value: node.Value}
+		integer := &object.Integer{Value: n.Value}
 		c.emit(code.OpConstant, c.addConstant(integer))
 	}
 

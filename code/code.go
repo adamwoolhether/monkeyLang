@@ -41,6 +41,8 @@ func (ins Instructions) fmtInstructions(def *Definition, operands []int) string 
 	}
 
 	switch operandCount {
+	case 0:
+		return def.Name
 	case 1:
 		return fmt.Sprintf("%s %d", def.Name, operands[0])
 	}
@@ -55,6 +57,8 @@ const (
 	// OpConstant acts as an index to hold bytecode instructions.
 	// Iota will automatically generate increasing byte values.
 	OpConstant Opcode = iota
+	// OpAdd tells the VM to pop the two leftmost elements off
+	// the stack, add them, and push the result back on stack.
 	OpAdd
 )
 
@@ -68,6 +72,7 @@ type Definition struct {
 // definitions holds the map of opcodes and their definitions.
 var definitions = map[Opcode]*Definition{
 	OpConstant: {"OpConstant", []int{2}},
+	OpAdd:      {"OpAdd", []int{}}, // Empty slice signifies no operands.
 }
 
 // Lookup enables looking up opcodes in the definitions map.
