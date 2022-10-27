@@ -64,6 +64,9 @@ const (
 	// This helps prevent the stack from filling up by cleaning it
 	// after every expression statement.
 	OpPop
+	OpSub // -
+	OpMul // *
+	OpDiv // /
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -78,6 +81,9 @@ var definitions = map[Opcode]*Definition{
 	OpConstant: {"OpConstant", []int{2}},
 	OpAdd:      {"OpAdd", []int{}}, // Empty slice signifies no operands.
 	OpPop:      {"OpPop", []int{}},
+	OpSub:      {"OpSub", []int{}},
+	OpMul:      {"OpMul", []int{}},
+	OpDiv:      {"OpDiv", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
