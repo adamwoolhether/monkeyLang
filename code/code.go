@@ -76,9 +76,13 @@ const (
 	// `OpLessThan` is omitted because with compilation, we can
 	// simply reorder code and reuse OpGreaterThan, allowing for
 	// smaller instruction set and tighter VM loop.
-	OpEqual
-	OpNotEqual
-	OpGreaterThan
+	OpEqual       // =
+	OpNotEqual    // !=
+	OpGreaterThan // >
+	// OpMinus negates integers.
+	OpMinus // -
+	// OpBang negates booleans.
+	OpBang // !
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -101,6 +105,8 @@ var definitions = map[Opcode]*Definition{
 	OpEqual:       {"OpEqual", []int{}},
 	OpNotEqual:    {"OpNotEqual", []int{}},
 	OpGreaterThan: {"OpGreaterThan", []int{}},
+	OpMinus:       {"OpMinus", []int{}},
+	OpBang:        {"OpBang", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.

@@ -79,6 +79,14 @@ func (vm *VM) Run() error {
 			if err := vm.executeComparison(op); err != nil {
 				return err
 			}
+		case code.OpBang:
+			if err := vm.executeBangOperator(); err != nil {
+				return err
+			}
+		case code.OpMinus:
+			if err := vm.executeMinusOperator(); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -206,4 +214,33 @@ func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	}
 
 	return False
+}
+
+// executeBangOperator pops the operand off stack and negates it
+// value by treating anything other than False as truthy.
+func (vm *VM) executeBangOperator() error {
+	operand := vm.pop()
+
+	switch operand {
+	case True:
+		return vm.push(False)
+	case False:
+		return vm.push(True)
+	default:
+		return vm.push(False)
+	}
+}
+
+// executeMinusOperator pops the operand off the stack and
+// negates the value of an integer.
+func (vm *VM) executeMinusOperator() error {
+	operand := vm.pop()
+
+	if operand.Type() != object.INTEGER_OBJ {
+		return fmt.Errorf("unsopported type for negation: %s", operand.Type())
+	}
+
+	value := operand.(*object.Integer).Value
+
+	return vm.push(&object.Integer{Value: -value}) // note the negation.
 }

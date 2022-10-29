@@ -96,6 +96,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 		} else {
 			c.emit(code.OpFalse)
 		}
+	case *ast.PrefixExpression:
+		if err := c.Compile(n.Right); err != nil {
+			return err
+		}
+		switch n.Operator {
+		case "!":
+			c.emit(code.OpBang)
+		case "-":
+			c.emit(code.OpMinus)
+		default:
+			return fmt.Errorf("unknown operator %s", n.Operator)
+		}
 	}
 
 	return nil
