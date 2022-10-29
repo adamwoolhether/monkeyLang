@@ -71,6 +71,14 @@ const (
 	// an *object.Boolean onto the stack.
 	OpTrue
 	OpFalse
+	// OpEqual and following comparison operators tell the VM
+	// to pop them off and push the result back on.
+	// `OpLessThan` is omitted because with compilation, we can
+	// simply reorder code and reuse OpGreaterThan, allowing for
+	// smaller instruction set and tighter VM loop.
+	OpEqual
+	OpNotEqual
+	OpGreaterThan
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -82,14 +90,17 @@ type Definition struct {
 
 // definitions holds the map of opcodes and their definitions.
 var definitions = map[Opcode]*Definition{
-	OpConstant: {"OpConstant", []int{2}},
-	OpAdd:      {"OpAdd", []int{}}, // Empty slice signifies no operands.
-	OpPop:      {"OpPop", []int{}},
-	OpSub:      {"OpSub", []int{}},
-	OpMul:      {"OpMul", []int{}},
-	OpDiv:      {"OpDiv", []int{}},
-	OpTrue:     {"OpTrue", []int{}},
-	OpFalse:    {"OpFalse", []int{}},
+	OpConstant:    {"OpConstant", []int{2}},
+	OpAdd:         {"OpAdd", []int{}}, // Empty slice signifies no operands.
+	OpPop:         {"OpPop", []int{}},
+	OpSub:         {"OpSub", []int{}},
+	OpMul:         {"OpMul", []int{}},
+	OpDiv:         {"OpDiv", []int{}},
+	OpTrue:        {"OpTrue", []int{}},
+	OpFalse:       {"OpFalse", []int{}},
+	OpEqual:       {"OpEqual", []int{}},
+	OpNotEqual:    {"OpNotEqual", []int{}},
+	OpGreaterThan: {"OpGreaterThan", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.

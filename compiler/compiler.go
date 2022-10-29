@@ -43,6 +43,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 		c.emit(code.OpPop) // clean the stack.
 	case *ast.InfixExpression:
+		// Special case for the `<` operator to reorder compilation
+		// and reuse code.OpGreaterThan.
+		if n.Operator == "<" {
+			if err := c.Compile(n.Right); err != nil {
+				return err
+			}
+
+			if err := c.Compile(n.Left); err != nil {
+				return err
+			}
+
+			c.emit(code.OpGreaterThan)
+
+			return nil
+		}
+
 		err := c.Compile(n.Left)
 		if err != nil {
 			return err
@@ -62,6 +78,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpMul)
 		case "/":
 			c.emit(code.OpDiv)
+		case ">":
+			c.emit(code.OpGreaterThan)
+		case "==":
+			c.emit(code.OpEqual)
+		case "!=":
+			c.emit(code.OpNotEqual)
 		default:
 			return fmt.Errorf("unknown operator %s", n.Operator)
 		}
