@@ -67,6 +67,10 @@ const (
 	OpSub // -
 	OpMul // *
 	OpDiv // /
+	// OpTrue and OpFalse tell the VM to push
+	// an *object.Boolean onto the stack.
+	OpTrue
+	OpFalse
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -84,6 +88,8 @@ var definitions = map[Opcode]*Definition{
 	OpSub:      {"OpSub", []int{}},
 	OpMul:      {"OpMul", []int{}},
 	OpDiv:      {"OpDiv", []int{}},
+	OpTrue:     {"OpTrue", []int{}},
+	OpFalse:    {"OpFalse", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
