@@ -182,6 +182,57 @@ func TestBooleanExpressions(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestConditionals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			if (true) { 10 }; 3333;
+			`,
+			expectedConstants: []interface{}{10, 333},
+			expectedInstructions: []code.Instructions{
+				// 0000
+				code.Make(code.OpTrue),
+				// 0001
+				code.Make(code.OpJumpNotTruthy, 7),
+				// 0004
+				code.Make(code.OpConstant, 0),
+				// 0007
+				code.Make(code.OpPop),
+				// 0008
+				code.Make(code.OpConstant, 1),
+				// 0011
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input: `
+			if (true) { 10 } else { 20 }; 3333;
+			`,
+			expectedConstants: []interface{}{10, 20, 333},
+			expectedInstructions: []code.Instructions{
+				// 0000
+				code.Make(code.OpTrue), // Push "true".
+				// 0001
+				code.Make(code.OpJumpNotTruthy, 10), // Jumps to 0010. --
+				// 0004
+				code.Make(code.OpConstant, 0), // Consequence: Load 10.
+				// 0007
+				code.Make(code.OpJump, 13), // Jump to 0013.
+				// 0010
+				code.Make(code.OpConstant, 1), // Alternative: Load 20.
+				// 0013
+				code.Make(code.OpPop), // Pop (optional) value of conditional.
+				// 0014
+				code.Make(code.OpConstant, 2), // Load 333 and
+				// 0017
+				code.Make(code.OpPop), // Pop it.
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 // runCompilerTests takes Monkey code input, parses it, produces and AST, and runs it
 // through the compiler before making assertions about the bytecode produced by the
 // compiler.

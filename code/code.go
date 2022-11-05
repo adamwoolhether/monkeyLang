@@ -83,6 +83,9 @@ const (
 	OpMinus // -
 	// OpBang negates booleans.
 	OpBang // !
+
+	OpJumpNotTruthy
+	OpJump
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -94,19 +97,21 @@ type Definition struct {
 
 // definitions holds the map of opcodes and their definitions.
 var definitions = map[Opcode]*Definition{
-	OpConstant:    {"OpConstant", []int{2}},
-	OpAdd:         {"OpAdd", []int{}}, // Empty slice signifies no operands.
-	OpPop:         {"OpPop", []int{}},
-	OpSub:         {"OpSub", []int{}},
-	OpMul:         {"OpMul", []int{}},
-	OpDiv:         {"OpDiv", []int{}},
-	OpTrue:        {"OpTrue", []int{}},
-	OpFalse:       {"OpFalse", []int{}},
-	OpEqual:       {"OpEqual", []int{}},
-	OpNotEqual:    {"OpNotEqual", []int{}},
-	OpGreaterThan: {"OpGreaterThan", []int{}},
-	OpMinus:       {"OpMinus", []int{}},
-	OpBang:        {"OpBang", []int{}},
+	OpConstant:      {"OpConstant", []int{2}}, // 16 bits wide.
+	OpAdd:           {"OpAdd", []int{}},       // Empty slice signifies no operands.
+	OpPop:           {"OpPop", []int{}},
+	OpSub:           {"OpSub", []int{}},
+	OpMul:           {"OpMul", []int{}},
+	OpDiv:           {"OpDiv", []int{}},
+	OpTrue:          {"OpTrue", []int{}},
+	OpFalse:         {"OpFalse", []int{}},
+	OpEqual:         {"OpEqual", []int{}},
+	OpNotEqual:      {"OpNotEqual", []int{}},
+	OpGreaterThan:   {"OpGreaterThan", []int{}},
+	OpMinus:         {"OpMinus", []int{}},
+	OpBang:          {"OpBang", []int{}},
+	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
+	OpJump:          {"OpJump", []int{2}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
