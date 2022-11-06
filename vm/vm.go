@@ -18,6 +18,8 @@ var (
 	// is always false.
 	True  = &object.Boolean{Value: true}
 	False = &object.Boolean{Value: false}
+	// Null allows implementation of Null values.
+	Null = &object.Null{}
 )
 
 // VM defines our virtual machine. It holds constants and instructions
@@ -97,6 +99,10 @@ func (vm *VM) Run() error {
 			condition := vm.pop()
 			if !isTruthy(condition) { // If topmost stack element is not truthy, we jump.
 				ip = pos - 1 // Set ip to index of instruction right before target.
+			}
+		case code.OpNull:
+			if err := vm.push(Null); err != nil {
+				return err
 			}
 		}
 	}
@@ -237,6 +243,8 @@ func (vm *VM) executeBangOperator() error {
 		return vm.push(False)
 	case False:
 		return vm.push(True)
+	case Null:
+		return vm.push(True)
 	default:
 		return vm.push(False)
 	}
@@ -261,6 +269,8 @@ func isTruthy(obj object.Object) bool {
 	switch o := obj.(type) {
 	case *object.Boolean:
 		return o.Value
+	case *object.Null:
+		return false
 	default:
 		return true
 	}
