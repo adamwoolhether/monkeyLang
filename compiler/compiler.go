@@ -153,7 +153,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			afterConsequencePos := len(c.instructions)
 			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
 
-			if err := c.Compile(n.Consequence); err != nil {
+			if err := c.Compile(n.Alternative); err != nil {
 				return err
 			}
 

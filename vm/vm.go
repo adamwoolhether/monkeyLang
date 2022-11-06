@@ -87,6 +87,17 @@ func (vm *VM) Run() error {
 			if err := vm.executeMinusOperator(); err != nil {
 				return err
 			}
+		case code.OpJump:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:])) // Decode the operand right after the opcode.
+			ip = pos - 1                                        // Set the instruction pointer to the target of our jump and negate offset of `ip` incrementation.
+		case code.OpJumpNotTruthy:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			condition := vm.pop()
+			if !isTruthy(condition) { // If topmost stack element is not truthy, we jump.
+				ip = pos - 1 // Set ip to index of instruction right before target.
+			}
 		}
 	}
 
@@ -243,4 +254,14 @@ func (vm *VM) executeMinusOperator() error {
 	value := operand.(*object.Integer).Value
 
 	return vm.push(&object.Integer{Value: -value}) // note the negation.
+}
+
+// isTruthy determines if a stack element is truthy or not.
+func isTruthy(obj object.Object) bool {
+	switch o := obj.(type) {
+	case *object.Boolean:
+		return o.Value
+	default:
+		return true
+	}
 }
