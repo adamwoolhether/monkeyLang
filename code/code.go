@@ -88,6 +88,11 @@ const (
 	OpJump
 	// OpNull tells the vm to put vm.Null on the stack.
 	OpNull
+
+	// OpGetGlobal and OpSetGlobal will hold unique numbers
+	// assigned to identifiers.
+	OpGetGlobal
+	OpSetGlobal
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -115,6 +120,8 @@ var definitions = map[Opcode]*Definition{
 	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
 	OpJump:          {"OpJump", []int{2}},
 	OpNull:          {"OpNull", []int{}},
+	OpGetGlobal:     {"OpGetGlobal", []int{2}},
+	OpSetGlobal:     {"OpSetGlobal", []int{2}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.

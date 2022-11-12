@@ -34,6 +34,8 @@ type Compiler struct {
 
 	lastInstruction     EmittedInstruction // The very last instruction emitted.
 	previousInstruction EmittedInstruction // The instruction emitted immediately before lastInstruction.
+
+	symbolTable *SymbolTable
 }
 
 func New() *Compiler {
@@ -42,6 +44,7 @@ func New() *Compiler {
 		constants:           []object.Object{},
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
+		symbolTable:         NewSymbolTable(),
 	}
 }
 
@@ -170,6 +173,20 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+	case *ast.LetStatement:
+		if err := c.Compile(n.Value); err != nil {
+			return err
+		}
+		symbol := c.symbolTable.Define(n.Name.Value)
+
+		c.emit(code.OpSetGlobal, symbol.Index)
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(n.Value)
+		if !ok {
+			return fmt.Errorf("undefined variable %s", n.Value)
+		}
+
+		c.emit(code.OpGetGlobal, symbol.Index)
 	}
 
 	return nil
