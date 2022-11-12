@@ -48,6 +48,16 @@ func New() *Compiler {
 	}
 }
 
+// NewWithState creates a compiler and VM that
+//  allows storing global state in the REPL.
+func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
+	compiler := New()
+	compiler.symbolTable = s
+	compiler.constants = constants
+
+	return compiler
+}
+
 // Compile determines how to handle given base on the node type.
 func (c *Compiler) Compile(node ast.Node) error {
 	switch n := node.(type) {
