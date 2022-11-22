@@ -197,6 +197,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpGetGlobal, symbol.Index)
+	case *ast.StringLiteral:
+		str := &object.String{Value: n.Value}
+		c.emit(code.OpConstant, c.addConstant(str))
 	}
 
 	return nil
