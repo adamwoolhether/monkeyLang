@@ -97,6 +97,11 @@ const (
 	// OpArray holds one operand: the number of elements in the array.
 	OpArray
 	OpHash
+
+	// OpIndex allows conducting operations on an element of a composite data structure.
+	// It will take both values off the stack, perform the op, and put result
+	// back on the stack.
+	OpIndex
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -128,6 +133,7 @@ var definitions = map[Opcode]*Definition{
 	OpSetGlobal:     {"OpSetGlobal", []int{2}},
 	OpArray:         {"OpArray", []int{2}}, // 2 bytes wide, 65535 maximum elements.
 	OpHash:          {"OpHash", []int{2}},
+	OpIndex:         {"OpIndex", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
