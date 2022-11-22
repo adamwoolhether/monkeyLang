@@ -7,6 +7,7 @@ package compiler
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/adamwoolhether/monkeyLang/ast"
 	"github.com/adamwoolhether/monkeyLang/code"
@@ -208,6 +209,26 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpArray, len(n.Elements)) // Put the number of elements in array on the stack.
+	case *ast.HashLiteral:
+		keys := []ast.Expression{}
+		for k := range n.Pairs {
+			keys = append(keys, k)
+		}
+		// Must sort our hashmap keys to allow proper testing.
+		sort.Slice(keys, func(i, j int) bool {
+			return keys[i].String() < keys[j].String()
+		})
+
+		for _, k := range keys {
+			if err := c.Compile(k); err != nil {
+				return err
+			}
+			if err := c.Compile(n.Pairs[k]); err != nil {
+				return err
+			}
+		}
+
+		c.emit(code.OpHash, len(n.Pairs)*2)
 	}
 
 	return nil
