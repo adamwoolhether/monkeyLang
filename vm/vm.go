@@ -130,6 +130,16 @@ func (vm *VM) Run() error {
 			if err := vm.push(vm.globals[globalIndex]); err != nil {
 				return err
 			}
+		case code.OpArray:
+			numElements := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			array := vm.buildArray(vm.sp-numElements, vm.sp)
+			vm.sp -= numElements
+
+			if err := vm.push(array); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -244,6 +254,16 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	default:
 		return fmt.Errorf("unknown operator: %d (%s %s)", op, left.Type(), right.Type())
 	}
+}
+
+func (vm *VM) buildArray(startIndex, endIndex int) object.Object {
+	elements := make([]object.Object, endIndex-startIndex)
+
+	for i := startIndex; i < endIndex; i++ {
+		elements[i-startIndex] = vm.stack[i]
+	}
+
+	return &object.Array{Elements: elements}
 }
 
 // executeIntegerComparison unwraps values contained in left & right, compares them

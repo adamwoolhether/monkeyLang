@@ -200,6 +200,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.StringLiteral:
 		str := &object.String{Value: n.Value}
 		c.emit(code.OpConstant, c.addConstant(str))
+	case *ast.ArrayLiteral:
+		for _, el := range n.Elements {
+			if err := c.Compile(el); err != nil {
+				return err
+			}
+		}
+
+		c.emit(code.OpArray, len(n.Elements)) // Put the number of elements in array on the stack.
 	}
 
 	return nil

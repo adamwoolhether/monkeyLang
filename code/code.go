@@ -93,6 +93,9 @@ const (
 	// assigned to identifiers.
 	OpGetGlobal
 	OpSetGlobal
+
+	// OpArray holds one operand: the number of elements in the array.
+	OpArray
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -122,6 +125,7 @@ var definitions = map[Opcode]*Definition{
 	OpNull:          {"OpNull", []int{}},
 	OpGetGlobal:     {"OpGetGlobal", []int{2}},
 	OpSetGlobal:     {"OpSetGlobal", []int{2}},
+	OpArray:         {"OpArray", []int{2}}, // 2 bytes wide, 65535 maximum elements.
 }
 
 // Lookup enables looking up opcodes in the definitions map.
