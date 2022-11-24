@@ -102,6 +102,16 @@ const (
 	// It will take both values off the stack, perform the op, and put result
 	// back on the stack.
 	OpIndex
+
+	// OpCall represents an expression. Tells the VM to execute
+	// the *object.CompiledFunction on top of the stack.
+	OpCall
+	// OpReturnValue represent implicit and explicit return calls.
+	// It telss the VM to return the value sitting on top of the stack.
+	OpReturnValue
+	// OpReturn tells the VM to return from the current function
+	// when there's nothing on the stack or return value.
+	OpReturn
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -134,6 +144,9 @@ var definitions = map[Opcode]*Definition{
 	OpArray:         {"OpArray", []int{2}}, // 2 bytes wide, 65535 maximum elements.
 	OpHash:          {"OpHash", []int{2}},
 	OpIndex:         {"OpIndex", []int{}},
+	OpCall:          {"OpCall", []int{}},
+	OpReturnValue:   {"OpReturnValue", []int{}},
+	OpReturn:        {"OpReturn", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.

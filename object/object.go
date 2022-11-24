@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"hash/fnv"
 	"strings"
-	
+
 	"github.com/adamwoolhether/monkeyLang/ast"
+	"github.com/adamwoolhether/monkeyLang/code"
 )
 
 type ObjectType string
@@ -25,6 +26,8 @@ const (
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
 	HASH_OBJ         = "HASH"
+
+	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
 )
 
 // Object defines the contract for all values in Monkey.
@@ -93,19 +96,19 @@ type Function struct {
 func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
 func (f *Function) Inspect() string {
 	var out bytes.Buffer
-	
+
 	params := []string{}
 	for _, p := range f.Parameters {
 		params = append(params, p.String())
 	}
-	
+
 	out.WriteString("fn")
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") {\n}")
 	out.WriteString(f.Body.String())
 	out.WriteString("\n")
-	
+
 	return out.String()
 }
 
@@ -139,16 +142,16 @@ type Array struct {
 func (ao *Array) Type() ObjectType { return ARRAY_OBJ }
 func (ao *Array) Inspect() string {
 	var out bytes.Buffer
-	
+
 	elements := []string{}
 	for _, e := range ao.Elements {
 		elements = append(elements, e.Inspect())
 	}
-	
+
 	out.WriteString("[")
 	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")
-	
+
 	return out.String()
 }
 
@@ -162,13 +165,13 @@ type HashKey struct {
 
 func (b *Boolean) HashKey() HashKey {
 	var value uint64
-	
+
 	if b.Value {
 		value = 1
 	} else {
 		value = 0
 	}
-	
+
 	return HashKey{Type: b.Type(), Value: value}
 }
 
@@ -180,7 +183,7 @@ func (s *String) HashKey() HashKey {
 	// TODO: Implement open-addressing or separate-chaining to prevent potential hash collisions.
 	h := fnv.New64a()
 	h.Write([]byte(s.Value))
-	
+
 	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
 
@@ -201,15 +204,29 @@ func (h *Hash) Type() ObjectType { return HASH_OBJ }
 
 func (h *Hash) Inspect() string {
 	var out bytes.Buffer
-	
+
 	pairs := []string{}
 	for _, pair := range h.Pairs {
 		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect()))
 	}
-	
+
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
-	
+
 	return out.String()
+}
+
+// CompiledFunction holds code.Instructions that come from
+// compiling a function literal. Being an Object, it can be
+// added as a constant to the compiler.Bytecode and loaded
+// in to the VM. This enables us to reuse code.OpConstant
+// to represent func literals on the stack.
+type CompiledFunction struct {
+	Instructions code.Instructions
+}
+
+func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("CompiledFunction[%p]", cf)
 }
