@@ -270,13 +270,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		compiledFn := &object.CompiledFunction{Instructions: instructions}
 		c.emit(code.OpConstant, c.addConstant(compiledFn))
-
 	case *ast.ReturnStatement:
 		if err := c.Compile(n.ReturnValue); err != nil {
 			return err
 		}
 
 		c.emit(code.OpReturnValue)
+	case *ast.CallExpression:
+		if err := c.Compile(n.Function); err != nil {
+			return err
+		}
+
+		c.emit(code.OpCall)
 	}
 
 	return nil
