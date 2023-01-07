@@ -224,6 +224,7 @@ func (h *Hash) Inspect() string {
 // to represent func literals on the stack.
 type CompiledFunction struct {
 	Instructions code.Instructions
+	NumLocals    int // How many local bindings the func will create.
 }
 
 func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
