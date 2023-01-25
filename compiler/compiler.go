@@ -81,15 +81,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+
 	case *ast.ExpressionStatement:
 		err := c.Compile(n.Expression)
 		if err != nil {
 			return err
 		}
 		c.emit(code.OpPop) // clean the stack.
+
 	case *ast.InfixExpression:
-		// Special case for the `<` operator to reorder compilation
-		// and reuse code.OpGreaterThan.
 		if n.Operator == "<" {
 			if err := c.Compile(n.Right); err != nil {
 				return err
@@ -98,9 +98,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			if err := c.Compile(n.Left); err != nil {
 				return err
 			}
-
 			c.emit(code.OpGreaterThan)
-
 			return nil
 		}
 
@@ -132,19 +130,23 @@ func (c *Compiler) Compile(node ast.Node) error {
 		default:
 			return fmt.Errorf("unknown operator %s", n.Operator)
 		}
+
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: n.Value}
 		c.emit(code.OpConstant, c.addConstant(integer))
+
 	case *ast.Boolean:
 		if n.Value {
 			c.emit(code.OpTrue)
 		} else {
 			c.emit(code.OpFalse)
 		}
+
 	case *ast.PrefixExpression:
 		if err := c.Compile(n.Right); err != nil {
 			return err
 		}
+
 		switch n.Operator {
 		case "!":
 			c.emit(code.OpBang)
@@ -153,6 +155,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		default:
 			return fmt.Errorf("unknown operator %s", n.Operator)
 		}
+
 	case *ast.IfExpression:
 		if err := c.Compile(n.Condition); err != nil {
 			return err
@@ -169,7 +172,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.removeLastPop()
 		}
 
-		// Emit an `OpJump` with a bogus value.
+		// Emit an `OpJump` with a bogus value
 		jumpPos := c.emit(code.OpJump, 9999)
 
 		afterConsequencePos := len(c.currentInstructions())
@@ -196,6 +199,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+
 	case *ast.LetStatement:
 		if err := c.Compile(n.Value); err != nil {
 			return err
@@ -208,7 +212,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpSetLocal, symbol.Index)
 		}
 
-		c.emit(code.OpSetGlobal, symbol.Index)
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(n.Value)
 		if !ok {
@@ -216,15 +219,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		if symbol.Scope == GlobalScope {
-			c.emit(code.OpSetGlobal, symbol.Index)
+			c.emit(code.OpGetGlobal, symbol.Index)
 		} else {
 			c.emit(code.OpGetLocal, symbol.Index)
 		}
 
-		c.emit(code.OpGetGlobal, symbol.Index)
 	case *ast.StringLiteral:
 		str := &object.String{Value: n.Value}
 		c.emit(code.OpConstant, c.addConstant(str))
+
 	case *ast.ArrayLiteral:
 		for _, el := range n.Elements {
 			if err := c.Compile(el); err != nil {
@@ -232,13 +235,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 
-		c.emit(code.OpArray, len(n.Elements)) // Put the number of elements in array on the stack.
+		c.emit(code.OpArray, len(n.Elements))
+
 	case *ast.HashLiteral:
 		keys := []ast.Expression{}
 		for k := range n.Pairs {
 			keys = append(keys, k)
 		}
-		// Must sort our hashmap keys to allow proper testing.
 		sort.Slice(keys, func(i, j int) bool {
 			return keys[i].String() < keys[j].String()
 		})
@@ -253,6 +256,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpHash, len(n.Pairs)*2)
+
 	case *ast.IndexExpression:
 		if err := c.Compile(n.Left); err != nil {
 			return err
@@ -263,6 +267,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpIndex)
+
 	case *ast.FunctionLiteral:
 		c.enterScope()
 
@@ -277,7 +282,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if c.lastInstructionIs(code.OpPop) {
 			c.replaceLastPopWithReturn()
 		}
-
 		if !c.lastInstructionIs(code.OpReturnValue) {
 			c.emit(code.OpReturn)
 		}
@@ -291,12 +295,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 			NumParameters: len(n.Parameters),
 		}
 		c.emit(code.OpConstant, c.addConstant(compiledFn))
+
 	case *ast.ReturnStatement:
 		if err := c.Compile(n.ReturnValue); err != nil {
 			return err
 		}
 
 		c.emit(code.OpReturnValue)
+
 	case *ast.CallExpression:
 		if err := c.Compile(n.Function); err != nil {
 			return err
@@ -309,6 +315,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpCall, len(n.Arguments))
+
 	}
 
 	return nil
