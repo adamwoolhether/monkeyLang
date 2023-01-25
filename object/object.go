@@ -223,8 +223,9 @@ func (h *Hash) Inspect() string {
 // in to the VM. This enables us to reuse code.OpConstant
 // to represent func literals on the stack.
 type CompiledFunction struct {
-	Instructions code.Instructions
-	NumLocals    int // How many local bindings the func will create.
+	Instructions  code.Instructions
+	NumLocals     int // How many local bindings the func will create.
+	NumParameters int
 }
 
 func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
