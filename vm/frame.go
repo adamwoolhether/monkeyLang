@@ -8,14 +8,14 @@ import (
 // Frame defines our stack frame that
 // holds execution-relevant information.
 type Frame struct {
-	fn          *object.CompiledFunction // The compiled func referenced by the frame.
-	ip          int                      // The IP for this frame/function.
-	basePointer int                      // Points to the bottom of the stack of current call frame.
+	cl          *object.Closure // The compiled func referenced by the frame.
+	ip          int             // The IP for this frame/function.
+	basePointer int             // Points to the bottom of the stack of current call frame.
 }
 
-func NewFrame(fn *object.CompiledFunction, basePointer int) *Frame {
+func NewFrame(cl *object.Closure, basePointer int) *Frame {
 	f := &Frame{
-		fn:          fn,
+		cl:          cl,
 		ip:          -1,
 		basePointer: basePointer,
 	}
@@ -24,5 +24,5 @@ func NewFrame(fn *object.CompiledFunction, basePointer int) *Frame {
 }
 
 func (f *Frame) Instructions() code.Instructions {
-	return f.fn.Instructions
+	return f.cl.Fn.Instructions
 }
