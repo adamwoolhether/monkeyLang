@@ -127,6 +127,7 @@ const (
 	// many free variables sit on the stack needing to be transferred
 	// to the about-to-be-created closure.
 	OpClosure
+	OpCurrentClosure
 	// OpGetFree enables retrieving free variables for compiling closures.
 	OpGetFree
 )
@@ -140,35 +141,36 @@ type Definition struct {
 
 // definitions holds the map of opcodes and their definitions.
 var definitions = map[Opcode]*Definition{
-	OpConstant:      {"OpConstant", []int{2}}, // 16 bits wide.
-	OpAdd:           {"OpAdd", []int{}},       // Empty slice signifies no operands.
-	OpPop:           {"OpPop", []int{}},
-	OpSub:           {"OpSub", []int{}},
-	OpMul:           {"OpMul", []int{}},
-	OpDiv:           {"OpDiv", []int{}},
-	OpTrue:          {"OpTrue", []int{}},
-	OpFalse:         {"OpFalse", []int{}},
-	OpEqual:         {"OpEqual", []int{}},
-	OpNotEqual:      {"OpNotEqual", []int{}},
-	OpGreaterThan:   {"OpGreaterThan", []int{}},
-	OpMinus:         {"OpMinus", []int{}},
-	OpBang:          {"OpBang", []int{}},
-	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
-	OpJump:          {"OpJump", []int{2}},
-	OpNull:          {"OpNull", []int{}},
-	OpGetGlobal:     {"OpGetGlobal", []int{2}},
-	OpSetGlobal:     {"OpSetGlobal", []int{2}},
-	OpArray:         {"OpArray", []int{2}}, // 2 bytes wide, 65535 maximum elements.
-	OpHash:          {"OpHash", []int{2}},
-	OpIndex:         {"OpIndex", []int{}},
-	OpCall:          {"OpCall", []int{1}},
-	OpReturnValue:   {"OpReturnValue", []int{}},
-	OpReturn:        {"OpReturn", []int{}},
-	OpGetLocal:      {"OpGetLocal", []int{1}},
-	OpSetLocal:      {"OpSetLocal", []int{1}},
-	OpGetBuiltin:    {"OpGetBuiltin", []int{1}},
-	OpClosure:       {"OpClosure", []int{2, 1}},
-	OpGetFree:       {"OpGetFree", []int{1}},
+	OpConstant:       {"OpConstant", []int{2}}, // 16 bits wide.
+	OpAdd:            {"OpAdd", []int{}},       // Empty slice signifies no operands.
+	OpPop:            {"OpPop", []int{}},
+	OpSub:            {"OpSub", []int{}},
+	OpMul:            {"OpMul", []int{}},
+	OpDiv:            {"OpDiv", []int{}},
+	OpTrue:           {"OpTrue", []int{}},
+	OpFalse:          {"OpFalse", []int{}},
+	OpEqual:          {"OpEqual", []int{}},
+	OpNotEqual:       {"OpNotEqual", []int{}},
+	OpGreaterThan:    {"OpGreaterThan", []int{}},
+	OpMinus:          {"OpMinus", []int{}},
+	OpBang:           {"OpBang", []int{}},
+	OpJumpNotTruthy:  {"OpJumpNotTruthy", []int{2}},
+	OpJump:           {"OpJump", []int{2}},
+	OpNull:           {"OpNull", []int{}},
+	OpGetGlobal:      {"OpGetGlobal", []int{2}},
+	OpSetGlobal:      {"OpSetGlobal", []int{2}},
+	OpArray:          {"OpArray", []int{2}}, // 2 bytes wide, 65535 maximum elements.
+	OpHash:           {"OpHash", []int{2}},
+	OpIndex:          {"OpIndex", []int{}},
+	OpCall:           {"OpCall", []int{1}},
+	OpReturnValue:    {"OpReturnValue", []int{}},
+	OpReturn:         {"OpReturn", []int{}},
+	OpGetLocal:       {"OpGetLocal", []int{1}},
+	OpSetLocal:       {"OpSetLocal", []int{1}},
+	OpGetBuiltin:     {"OpGetBuiltin", []int{1}},
+	OpClosure:        {"OpClosure", []int{2, 1}},
+	OpGetFree:        {"OpGetFree", []int{1}},
+	OpCurrentClosure: {"OpCurrentClosure", []int{}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
