@@ -127,6 +127,8 @@ const (
 	// many free variables sit on the stack needing to be transferred
 	// to the about-to-be-created closure.
 	OpClosure
+	// OpGetFree enables retrieving free variables for compiling closures.
+	OpGetFree
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -166,6 +168,7 @@ var definitions = map[Opcode]*Definition{
 	OpSetLocal:      {"OpSetLocal", []int{1}},
 	OpGetBuiltin:    {"OpGetBuiltin", []int{1}},
 	OpClosure:       {"OpClosure", []int{2, 1}},
+	OpGetFree:       {"OpGetFree", []int{1}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
