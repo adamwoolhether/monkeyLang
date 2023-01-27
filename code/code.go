@@ -117,6 +117,10 @@ const (
 	// OpReturn tells the VM to return from the current function
 	// when there's nothing on the stack or return value.
 	OpReturn
+	// OpGetBuiltin is emitted when the compiler detects a reference
+	// to a builtin function. The operand in this instruction will
+	// be at the index of the referenced function of object.Builtins.
+	OpGetBuiltin
 )
 
 // Definition enables looking up how many operands and opcode has
@@ -154,6 +158,7 @@ var definitions = map[Opcode]*Definition{
 	OpReturn:        {"OpReturn", []int{}},
 	OpGetLocal:      {"OpGetLocal", []int{1}},
 	OpSetLocal:      {"OpSetLocal", []int{1}},
+	OpGetBuiltin:    {"OpGetBuiltin", []int{1}},
 }
 
 // Lookup enables looking up opcodes in the definitions map.
